@@ -1,6 +1,6 @@
 # MSSP Overview API with SQL queries:
 
-## API -> /top-orgs-for-categories 
+## API -> /top-orgs-for-categories
 
 `curl "localhost:3000/providers/1816781/top-orgs-for-categories?from=1748582481000&to=1748587001000&categories=65,67,68,150" -H "Authorization: internalv1 testtoken" | jq .`
 
@@ -46,13 +46,13 @@ ORDER BY
 	count DESC
 LIMIT '5'
 ```
---- 
+---
 
-## API 02 /top-incident-categories
+## API -> /top-incident-categories
 
 `curl "localhost:3000/providers/1816781/top-incident-categories?from=1748582481000&to=1748587001000" -H "Authorization: internalv1 testtoken" | jq .`
 
-SQL Query: 
+SQL Query:
 
 Hourwise-
 ``` sql
@@ -77,7 +77,7 @@ GROUP BY
 	category
 ORDER BY
 	hourhumanreadable ASC
-	
+
 -- PROXY
 SELECT
 	distinct toInt64(hourhumanreadable) AS hourtimestamp,
