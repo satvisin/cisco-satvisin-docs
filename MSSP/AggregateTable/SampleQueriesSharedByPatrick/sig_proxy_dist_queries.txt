@@ -1,0 +1,344 @@
+Log Types
+
+1) sig_proxy_dist
+2) ips_dist
+3) swa_dist
+4) cdfw_dist
+5) zproxy_dist
+
+------------------------------------ SIG PROXY ------------------------------------
+
+1. top-orgs-for-categories
+
+
+SOURCE QUERY:
+
+SELECT
+	transaction_organizationId AS orgId,
+	count(*) AS count
+FROM sig_proxy_dist 
+WHERE 
+	transaction_mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND hasAny(verdict_categories, [64,65,66,67,68,150])
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-10 20:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-10 22:00:00')
+	AND eventDate = '2025-08-10'
+GROUP BY 
+	orgId
+ORDER BY
+	count DESC
+
+
+┌───orgId─┬─count─┐
+│ 8241994 │ 36000 │
+│ 8039994 │  9000 │
+│ 2682198 │  1440 │
+└─────────┴───────┘
+
+AGG QUERY:
+
+SELECT
+	orgId,
+    countMerge(requestCount) AS requestCount
+FROM sig_proxy_agg_table_1_dist
+WHERE
+    mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND hasAny(verdict_categories, [64,65,66,67,68,150])
+    AND tsHour >= toDateTime('2025-08-10 20:00:00')
+    AND tsHour <= toDateTime('2025-08-10 22:00:00')
+    AND eventDate = '2025-08-10'
+GROUP BY
+	orgId
+ORDER BY
+    requestCount DESC
+
+┌───orgId─┬─requestCount─┐
+│ 8241994 │        36000 │
+│ 8039994 │         9000 │
+│ 2682198 │         1440 │
+└─────────┴──────────────┘
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. top-incident-categories
+
+SOURCE QUERY:
+
+(HOUR)
+
+SELECT DISTINCT
+	toStartOfHour(toDateTime(timestamp)) AS hourhumanreadable,
+	toInt64(hourhumanreadable) AS hourtimestamp,
+	arrayJoin(verdict_categories) AS category, 
+	count(*) AS requestCount
+FROM sig_proxy_dist 
+WHERE
+	transaction_mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND hasAny(verdict_categories, [65, 67, 68, 150])
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-10 20:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-10 22:00:00')
+	AND eventDate = '2025-08-10'
+GROUP BY
+	hourhumanreadable,
+	category
+ORDER BY 
+	hourhumanreadable ASC
+
+┌───hourhumanreadable─┬─hourtimestamp─┬─category─┬─requestCount─┐
+│ 2025-08-10 20:00:00 │    1754856000 │       67 │        15480 │
+│ 2025-08-10 20:00:00 │    1754856000 │       25 │        15480 │
+│ 2025-08-10 20:00:00 │    1754856000 │      167 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │       25 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │      167 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │       67 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │       67 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │      167 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │       25 │        15480 │
+└─────────────────────┴───────────────┴──────────┴──────────────┘
+
+AGG QUERY:
+
+SELECT DISTINCT
+	tsHour AS hourhumanreadable,
+    toInt64(hourhumanreadable) AS hourtimestamp,
+    arrayJoin(verdict_categories) AS category,
+    countMerge(requestCount) AS requestCount
+FROM sig_proxy_agg_table_1_dist
+WHERE
+    mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND hasAny(verdict_categories, [65, 67, 68, 150])
+    AND tsHour >= toDateTime('2025-08-10 20:00:00')
+    AND tsHour <= toDateTime('2025-08-10 22:00:00')
+    AND eventDate = '2025-08-10'
+GROUP BY
+	hourhumanreadable,
+	category
+ORDER BY
+    hourhumanreadable ASC
+
+┌───hourhumanreadable─┬─hourtimestamp─┬─category─┬─requestCount─┐
+│ 2025-08-10 20:00:00 │    1754856000 │       67 │        15480 │
+│ 2025-08-10 20:00:00 │    1754856000 │       25 │        15480 │
+│ 2025-08-10 20:00:00 │    1754856000 │      167 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │       25 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │      167 │        15480 │
+│ 2025-08-10 21:00:00 │    1754859600 │       67 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │       67 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │      167 │        15480 │
+│ 2025-08-10 22:00:00 │    1754863200 │       25 │        15480 │
+└─────────────────────┴───────────────┴──────────┴──────────────┘
+
+(DAY- same exact thing except Reporting is using addDays function instead of addHours)
+
+SELECT 
+	distinct toInt64(hourhumanreadable) AS hourtimestamp, 
+	toStartOfDay(toDateTime(timestamp)) AS hourhumanreadable,
+	arrayJoin(verdict_categories) AS category,
+	count(*) AS requestCount
+FROM sig_proxy_dist 
+	WHERE 
+		transaction_mspOrganizationId = '1816781'
+		AND verdict_status = 'BLOCKED'
+		AND hasAny(verdict_categories, [65, 67, 68, 150])
+		AND timestamp >= toInt64(toStartOfDay(toDateTime(1748582481)))
+		AND timestamp <= toInt64(toStartOfDay(addDays(toDateTime(1748587001), 1)))
+		AND eventDate >= '2025-05-30'
+		AND eventDate <= '2025-05-30'
+GROUP BY 
+	hourhumanreadable,
+	category
+ORDER BY hourhumanreadable ASC
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3. top-policy-hitcounts
+
+SOURCE QUERY:
+
+SELECT
+	transaction_policy_ruleId AS ruleid, 
+	count(*) AS count,
+	any(transaction_organizationId) AS orgid
+FROM sig_proxy_dist
+WHERE
+	transaction_mspOrganizationId = '0' 
+	AND isNotNull(transaction_policy_ruleId)
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-10 20:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-10 22:00:00')
+	AND eventDate = '2025-08-10'
+GROUP BY
+	ruleid 
+ORDER BY
+	count DESC
+
+┌─ruleid─┬─count─┬───orgid─┐
+│ 468530 │ 81000 │ 8242781 │
+│ 271437 │ 73440 │ 8242781 │
+│ 468528 │ 63000 │ 8242781 │
+│ 271449 │ 55080 │ 8242784 │
+│ 269045 │ 54000 │ 8241994 │
+└────────┴───────┴─────────┘
+
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleIdCoalesce AS ruleId,
+    countMerge(requestCount) AS requestCount,
+    any(orgId) AS orgId
+FROM sig_proxy_agg_table_1_dist
+WHERE
+    mspOrganizationId = '0'
+    AND isRuleIdNull = 0
+    AND tsHour >= toDateTime('2025-08-10 20:00:00')
+    AND tsHour <= toDateTime('2025-08-10 22:00:00')
+    AND eventDate = '2025-08-10'
+GROUP BY
+	ruleId
+ORDER BY
+    requestCount DESC
+
+
+┌─ruleId─┬─requestCount─┬───orgId─┐
+│ 468530 │        81000 │ 8242781 │
+│ 271437 │        73440 │ 8242781 │
+│ 468528 │        63000 │ 8242781 │
+│ 271449 │        55080 │ 8242784 │
+│ 269045 │        54000 │ 8241994 │
+└────────┴──────────────┴─────────┘
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+4. top-user-blocks
+
+SOURCE QUERY:
+
+SELECT
+	transaction_originId AS originId,
+	transaction_organizationId AS orgId,
+	transaction_originType AS origintype,
+	count(*) AS count
+FROM sig_proxy_dist 
+WHERE
+	transaction_mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND transaction_originType in ('7', '43', '48')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-10 20:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-10 22:00:00')
+	AND eventDate = '2025-08-10'
+GROUP BY
+	originId,
+	orgId,
+	origintype
+ORDER BY 
+	count DESC
+
+┌───originId─┬───orgId─┬─origintype─┬─count─┐
+│ 1632536859 │ 8242784 │         43 │ 18000 │
+│ 1079902907 │ 8242782 │          7 │ 18000 │
+│ 1083428188 │ 2448922 │          7 │ 17313 │
+│  324382972 │ 2448922 │          7 │  6387 │
+│ 1075291053 │ 8151514 │          7 │   239 │
+│ 1075193228 │ 8242538 │          7 │   108 │
+│ 1080567767 │ 8242330 │          7 │   108 │
+│ 1075229460 │ 8243713 │          7 │   108 │
+│ 1080568382 │ 8279136 │          7 │   108 │
+│ 1075361995 │ 8232234 │          7 │     2 │
+└────────────┴─────────┴────────────┴───────┘
+
+
+AGG QUERY:
+
+SELECT
+	originId,
+	orgId,
+	originType,
+    countMerge(requestCount) AS requestCount
+FROM sig_proxy_agg_table_1_dist
+WHERE
+    mspOrganizationId = '0'
+	AND verdict_status = 'BLOCKED'
+	AND originType in ('7', '43', '48')
+    AND tsHour >= toDateTime('2025-08-10 20:00:00')
+    AND tsHour <= toDateTime('2025-08-10 22:00:00')
+    AND eventDate = '2025-08-10'
+GROUP BY
+	originId,
+	orgId,
+	originType
+ORDER BY
+    requestCount DESC
+
+┌───originId─┬───orgId─┬─originType─┬─requestCount─┐
+│ 1632536859 │ 8242784 │         43 │        18000 │
+│ 1079902907 │ 8242782 │          7 │        18000 │
+│ 1083428188 │ 2448922 │          7 │        17313 │
+│  324382972 │ 2448922 │          7 │         6387 │
+│ 1075291053 │ 8151514 │          7 │          239 │
+│ 1075193228 │ 8242538 │          7 │          108 │
+│ 1080567767 │ 8242330 │          7 │          108 │
+│ 1075229460 │ 8243713 │          7 │          108 │
+│ 1080568382 │ 8279136 │          7 │          108 │
+│ 1075361995 │ 8232234 │          7 │            2 │
+└────────────┴─────────┴────────────┴──────────────┘
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. summaries-by-rule-msp
+
+SOURCE QUERY:
+
+SELECT 
+	transaction_policy_ruleId AS ruleid,
+	count(*) AS hitcount,
+	max(toStartOfHour(toDateTime(timestamp))) AS lasteventat
+FROM sig_proxy_dist 
+WHERE
+	transaction_mspOrganizationId = '0'
+	AND transaction_policy_ruleId in ('1323581', '1358864', '1332875')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-10 20:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-10 22:00:00')
+	AND eventDate = '2025-08-10'
+GROUP BY 
+	ruleid
+ORDER BY hitcount DESC
+
+┌──ruleid─┬─hitcount─┬─────────lasteventat─┐
+│ 1332875 │       36 │ 2025-08-10 22:00:00 │
+│ 1323581 │        3 │ 2025-08-10 22:00:00 │
+│ 1358864 │        2 │ 2025-08-10 22:00:00 │
+└─────────┴──────────┴─────────────────────┘
+
+
+AGG QUERY:
+
+SELECT
+	ruleIdCoalesce AS ruleId,
+    countMerge(requestCount) AS hitCount,
+    max(tsHour) as lastEventAtTsHour
+FROM sig_proxy_agg_table_1_dist
+WHERE
+    mspOrganizationId = '0'
+	AND ruleId in ('1323581', '1358864', '1332875')
+    AND tsHour >= toDateTime('2025-08-10 20:00:00')
+    AND tsHour <= toDateTime('2025-08-10 22:00:00')
+    AND eventDate = '2025-08-10'
+GROUP BY
+	ruleId
+ORDER BY
+    hitCount DESC
+
+
+┌──ruleId─┬─hitCount─┬───lastEventAtTsHour─┐
+│ 1332875 │       36 │ 2025-08-10 22:00:00 │
+│ 1323581 │        3 │ 2025-08-10 22:00:00 │
+│ 1358864 │        2 │ 2025-08-10 22:00:00 │
+└─────────┴──────────┴─────────────────────┘
+
+
+
+

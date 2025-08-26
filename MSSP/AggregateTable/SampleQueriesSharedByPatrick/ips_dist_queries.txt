@@ -1,0 +1,114 @@
+--------------------------------------  IPS Dist -------------------------------------- 
+
+3. top-policy-hitcounts
+
+SOURCE QUERY:
+
+SELECT
+	firewallRuleId AS ruleid,
+	count(*) AS count,
+	any(organizationId) AS orgid
+FROM ips_dist
+WHERE
+	mspOrganizationId = '0'
+	AND isNotNull(firewallRuleId)
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY
+	count DESC
+
+┌──ruleid─┬─count─┬───orgid─┐
+│   21171 │ 39513 │ 8151514 │
+│   44686 │  4501 │ 8151514 │
+│ 1505961 │  1088 │ 8322807 │
+│ 1440405 │  1006 │ 8218571 │
+
+AGG QUERY:
+
+SELECT
+	ruleIdCoalesce AS ruleId,
+    countMerge(requestCount) AS count,
+    any(orgId) AS orgId
+FROM ips_agg_table_1_dist
+WHERE
+	mspOrganizationId = '0'
+	AND isRuleIdNull = 0
+    AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY
+	count DESC
+
+┌──ruleId─┬─count─┬───orgId─┐
+│   21171 │ 39513 │ 8151514 │
+│   44686 │  4501 │ 8151514 │
+│ 1505961 │  1088 │ 8322807 │
+│ 1440405 │  1006 │ 8218571 │
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4. top-user-blocks
+
+SOURCE QUERY:
+
+SELECT
+	originId AS originId,
+	organizationId AS orgId,
+	originType AS origintype,
+	count(*) AS count
+FROM ips_dist
+WHERE 
+	mspOrganizationId = '0'
+	AND action = 'BLOCK'
+	AND originType in ('7', '43', '48')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	origintype
+ORDER BY
+	count DESC
+
+┌───originId─┬───orgId─┬─origintype─┬─count─┐
+│       1779 │ 8151514 │          7 │ 36147 │
+│   11223355 │ 8151514 │          7 │  4870 │
+│ 1349261016 │ 8218571 │          7 │  1006 │
+│       1618 │ 8151514 │          7 │   673 │
+│      87478 │ 8151514 │          7 │   342 │
+
+AGG QUERY:
+
+SELECT
+	originId,
+    orgId,
+    originType,
+    countMerge(requestCount) AS count
+FROM ips_agg_table_1_dist
+WHERE
+	mspOrganizationId = '0'
+	AND action = 'BLOCK'
+	AND originType in ('7', '43', '48')
+    AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	originType
+ORDER BY
+	count DESC
+
+┌───originId─┬───orgId─┬─originType─┬─count─┐
+│       1779 │ 8151514 │          7 │ 36147 │
+│   11223355 │ 8151514 │          7 │  4870 │
+│ 1349261016 │ 8218571 │          7 │  1006 │
+│       1618 │ 8151514 │          7 │   673 │
+│      87478 │ 8151514 │          7 │   342 │
+

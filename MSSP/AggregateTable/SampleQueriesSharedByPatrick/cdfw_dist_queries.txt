@@ -1,0 +1,189 @@
+- If you look at schema of cdfw_dist table, mspOrganizationId and originType can be null, but rule_id cannot be null
+
+--------------------------------------  CDFW Dist -------------------------------------- 
+
+3. top-policy-hitcounts
+
+SOURCE QUERY:
+
+SELECT
+	rule_id AS ruleid,
+	count(*) AS count,
+	any(organization_id) AS orgid
+FROM 
+	cdfw_dist
+WHERE
+	mspOrganizationId = 8308229
+	AND isNotNull(rule_id)
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY
+	count DESC
+
+┌──ruleid─┬─count─┬───orgid─┐
+│ 1706808 │ 19467 │ 8333252 │
+│ 1086572 │  1081 │ 8225109 │
+│ 1706633 │   617 │ 8333252 │
+│ 1630762 │   436 │ 8225109 │
+│ 1086571 │   100 │ 8225109 │
+│ 1706627 │    24 │ 8333252 │
+│ 1706818 │     1 │ 8333252 │
+└─────────┴───────┴─────────┘
+
+AGG QUERY:
+
+SELECT
+	ruleId,
+    countMerge(requestCount) AS count,
+    any(orgId) AS orgId
+FROM
+	cdfw_agg_table_1_dist
+WHERE
+	mspOrganizationIdCoalesce = 8308229
+	AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY
+	count DESC
+
+┌──ruleId─┬─count─┬───orgId─┐
+│ 1706808 │ 19467 │ 8333252 │
+│ 1086572 │  1081 │ 8225109 │
+│ 1706633 │   617 │ 8333252 │
+│ 1630762 │   436 │ 8225109 │
+│ 1086571 │   100 │ 8225109 │
+│ 1706627 │    24 │ 8333252 │
+│ 1706818 │     1 │ 8333252 │
+└─────────┴───────┴─────────┘
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4. top-user-blocks
+
+
+SOURCE QUERY:
+
+SELECT
+	origin_id AS originId,
+	organization_id AS orgId,
+	origin_type AS origintype,
+	count(*) AS count
+FROM 
+	cdfw_dist
+WHERE 
+	mspOrganizationId = 8308229
+	AND verdict = 'ALLOW'
+	AND origin_type in ('7', '43', '48', '40')
+	AND toStartOfHour(toDateTime(timestamp)) = toDateTime('2025-08-12 19:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	origintype
+ORDER BY
+	count DESC
+
+┌──originId─┬───orgId─┬─origintype─┬─count─┐
+│ 653591987 │ 8333252 │         40 │ 10042 │
+│ 641774157 │ 8225109 │         40 │   608 │
+│ 649482899 │ 8225109 │         40 │   133 │
+└───────────┴─────────┴────────────┴───────┘
+
+AGGREGATE QUERY:
+
+SELECT
+	originId,
+	orgId,
+	originTypeCoalesce,
+    countMerge(requestCount) AS count
+FROM
+	cdfw_agg_table_1_dist
+WHERE
+	mspOrganizationIdCoalesce = 8308229
+	AND verdictStatus = 'ALLOW'
+	AND originTypeCoalesce in ('7', '43', '48', '40')
+    AND tsHour = toDateTime('2025-08-12 19:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	originTypeCoalesce
+ORDER BY
+	count DESC
+
+┌──originId─┬───orgId─┬─originTypeCoalesce─┬─count─┐
+│ 653591987 │ 8333252 │                 40 │ 10042 │
+│ 641774157 │ 8225109 │                 40 │   608 │
+│ 649482899 │ 8225109 │                 40 │   133 │
+└───────────┴─────────┴────────────────────┴───────┘
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. summaries-by-rule-msp
+
+SOURCE QUERY:
+
+
+SELECT
+	rule_id AS ruleid,
+	count(*) AS hitcount,
+	max(toStartOfHour(toDateTime(timestamp))) AS lasteventat,
+	log_type
+FROM
+	cdfw_dist
+WHERE
+	mspOrganizationId = 8308229
+	AND log_type = 'sfcn-fw'
+	AND rule_id in ('1706808', '1086572', '1706633', '1630762')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid,
+	log_type
+ORDER BY
+	hitcount DESC
+
+┌──ruleid─┬─hitcount─┬─────────lasteventat─┬─log_type─┐
+│ 1706808 │    19467 │ 2025-08-12 08:00:00 │ sfcn-fw  │
+│ 1086572 │     1081 │ 2025-08-12 08:00:00 │ sfcn-fw  │
+│ 1706633 │      617 │ 2025-08-12 08:00:00 │ sfcn-fw  │
+│ 1630762 │      436 │ 2025-08-12 08:00:00 │ sfcn-fw  │
+└─────────┴──────────┴─────────────────────┴──────────┘
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleId,
+    countMerge(requestCount) AS hitcount,
+	max(tsHour) AS lasteventat,
+	logType
+FROM
+	cdfw_agg_table_1_dist
+WHERE
+	mspOrganizationIdCoalesce = 8308229
+	AND logType = 'sfcn-fw'
+	AND ruleId in ('1706808', '1086572', '1706633', '1630762')
+	AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId,
+	logType
+ORDER BY
+	hitcount DESC
+
+
+┌──ruleId─┬─hitcount─┬─────────lasteventat─┬─logType─┐
+│ 1706808 │    19467 │ 2025-08-12 08:00:00 │ sfcn-fw │
+│ 1086572 │     1081 │ 2025-08-12 08:00:00 │ sfcn-fw │
+│ 1706633 │      617 │ 2025-08-12 08:00:00 │ sfcn-fw │
+│ 1630762 │      436 │ 2025-08-12 08:00:00 │ sfcn-fw │
+└─────────┴──────────┴─────────────────────┴─────────┘
+

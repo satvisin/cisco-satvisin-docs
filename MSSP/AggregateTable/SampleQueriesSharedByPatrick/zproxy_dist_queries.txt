@@ -1,0 +1,179 @@
+- ruleId cannot be null in the zproxy schema
+
+--------------------------------------  ZPROXY Dist -------------------------------------- 
+
+3. top-policy-hitcounts
+
+SOURCE QUERY:
+
+SELECT
+	ruleId AS ruleid,
+	count(*) AS count,
+	any(organizationIds[1]) AS orgid
+FROM
+	zproxy_dist
+WHERE
+	mspOrganizationIds[1] = '0'
+	AND isNotNull(ruleId)
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 16:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 17:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY
+	count DESC
+
+┌──ruleid─┬──count─┬───orgid─┐
+│ 1034752 │ 710207 │ 8290712 │
+│ 1258508 │ 280613 │ 8307286 │
+│ 1233834 │ 258417 │ 8243345 │
+│    2335 │ 154465 │ 8144292 │
+│  906734 │ 153561 │ 8266565 │
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleId,
+    countMerge(requestCount) AS count,
+	any(orgId) as orgId
+FROM
+	zproxy_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND tsHour >= toDateTime('2025-08-12 16:00:00')
+    AND tsHour <= toDateTime('2025-08-12 17:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY
+	count DESC
+
+┌──ruleId─┬──count─┬───orgId─┐
+│ 1034752 │ 710207 │ 8290712 │
+│ 1258508 │ 280613 │ 8307286 │
+│ 1233834 │ 258417 │ 8243345 │
+│    2335 │ 154465 │ 8144292 │
+│  906734 │ 153561 │ 8266565 │
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4. top-user-blocks
+
+SOURCE QUERY:
+
+SELECT
+	originIds[1] AS originId,
+	organizationIds[1] AS orgId,
+	originTypes[1] AS origintype,
+	count(*) AS count
+FROM
+	zproxy_dist
+WHERE 
+	mspOrganizationIds[1] = '0'
+	AND verdict = 'BLOCK' 
+	AND originTypes[1] in ('7', '43', '48')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 16:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 17:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	origintype
+ORDER BY
+	count DESC
+
+│ 1336973046 │ 8295354 │          7 │  11552 │
+│ 1298955602 │ 8259075 │          7 │  12947 │
+│ 1303555387 │ 8262016 │          7 │  13452 │
+│   11223355 │ 8144292 │          7 │ 154465 │
+│ 1328704254 │ 8290712 │          7 │ 697210 │
+└────────────┴─────────┴────────────┴────────┘
+
+AGGREGATE QUERY:
+
+SELECT
+	originId,
+	orgId,
+	originType,
+    countMerge(requestCount) AS count
+FROM
+	zproxy_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND verdictStatus = 'BLOCK'
+	AND originType in ('7', '43', '48')
+	AND tsHour >= toDateTime('2025-08-12 16:00:00')
+    AND tsHour <= toDateTime('2025-08-12 17:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	originType
+ORDER BY
+	count DESC
+
+
+│ 1336973046 │ 8295354 │          7 │  11552 │
+│ 1298955602 │ 8259075 │          7 │  12947 │
+│ 1303555387 │ 8262016 │          7 │  13452 │
+│   11223355 │ 8144292 │          7 │ 154465 │
+│ 1328704254 │ 8290712 │          7 │ 697210 │
+└────────────┴─────────┴────────────┴────────┘
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. summaries-by-rule-msp
+
+SOURCE QUERY:
+
+SELECT
+	ruleId AS ruleid,
+	count(*) AS hitcount,
+	max(toStartOfHour(toDateTime(timestamp))) AS lasteventat
+FROM 
+	zproxy_dist
+WHERE 
+	mspOrganizationIds[1] = 0
+	AND ruleId in ('1034752', '1258508', '1233834', '2335')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 16:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 17:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY hitcount DESC
+
+
+┌──ruleid─┬─hitcount─┬─────────lasteventat─┐
+│ 1034752 │   710207 │ 2025-08-12 17:00:00 │
+│ 1258508 │   280613 │ 2025-08-12 17:00:00 │
+│ 1233834 │   258417 │ 2025-08-12 17:00:00 │
+│    2335 │   154465 │ 2025-08-12 17:00:00 │
+└─────────┴──────────┴─────────────────────┘
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleId,
+    countMerge(requestCount) AS hitCount,
+    max(tsHour) AS lasteventat
+FROM
+	zproxy_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND ruleId in ('1034752', '1258508', '1233834', '2335')
+	AND tsHour >= toDateTime('2025-08-12 16:00:00')
+    AND tsHour <= toDateTime('2025-08-12 17:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY hitCount DESC
+
+┌──ruleId─┬─hitCount─┬─────────lasteventat─┐
+│ 1034752 │   710207 │ 2025-08-12 17:00:00 │
+│ 1258508 │   280613 │ 2025-08-12 17:00:00 │
+│ 1233834 │   258417 │ 2025-08-12 17:00:00 │
+│    2335 │   154465 │ 2025-08-12 17:00:00 │
+└─────────┴──────────┴─────────────────────┘
+

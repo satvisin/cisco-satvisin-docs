@@ -1,0 +1,161 @@
+--------------------------------------  SWA Dist -------------------------------------- 
+
+3. top-policy-hitcounts
+
+SOURCE QUERY:
+
+SELECT
+	transaction_policy_ruleId AS ruleid,
+	count(*) AS count,
+	any(transaction_organizationId) AS orgid
+FROM swa_dist
+WHERE
+	transaction_mspOrganizationId = '0'
+	AND isNotNull(transaction_policy_ruleId)
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY
+	count DESC
+
+┌──ruleid─┬─count─┬───orgid─┐
+│ 1049173 │   359 │ 2647176 │
+└─────────┴───────┴─────────┘
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleIdCoalesce AS ruleId,
+    countMerge(requestCount) AS count,
+	any(orgId) AS orgId
+FROM swa_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND isRuleIdNull = 0
+	AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY
+	count DESC
+
+┌──ruleId─┬─count─┬───orgId─┐
+│ 1049173 │   359 │ 2647176 │
+└─────────┴───────┴─────────┘
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4. top-user-blocks
+
+SOURCE QUERY:
+
+SELECT
+	transaction_originId AS originId,
+	transaction_organizationId AS orgId,
+	transaction_originType AS origintype,
+	count(*) AS count
+FROM swa_dist
+WHERE 
+	transaction_mspOrganizationId = '0'
+	AND verdict_status = 'ALLOWED'
+	AND transaction_originType in ('7', '43', '48', '5')
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY 
+	originId,
+	orgId,
+	origintype
+ORDER BY
+	count DESC
+
+┌──originId─┬───orgId─┬─origintype─┬─count─┐
+│ 330130778 │ 2647176 │          5 │   359 │
+└───────────┴─────────┴────────────┴───────┘
+
+
+AGGREGATE QUERY:
+
+SELECT
+	originId,
+	orgId,
+	originType,
+    countMerge(requestCount) AS count
+FROM swa_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND verdictStatus = 'ALLOWED'
+	AND originType in ('7', '43', '48', '5')
+	AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	originId,
+	orgId,
+	originType
+ORDER BY
+	count DESC
+
+┌──originId─┬───orgId─┬─originType─┬─count─┐
+│ 330130778 │ 2647176 │          5 │   359 │
+└───────────┴─────────┴────────────┴───────┘
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. summaries-by-rule-msp
+
+SOURCE QUERY:
+
+SELECT
+	transaction_policy_ruleId AS ruleid,
+	count(*) AS hitcount,
+	max(toStartOfHour(toDateTime(timestamp))) AS lasteventat
+FROM swa_dist
+WHERE
+	transaction_mspOrganizationId = '0'
+	AND transaction_policy_ruleId in ('1049173', '43') 	
+	AND toStartOfHour(toDateTime(timestamp)) >= toDateTime('2025-08-12 07:00:00')
+	AND toStartOfHour(toDateTime(timestamp)) <= toDateTime('2025-08-12 08:00:00')
+	AND eventDate = '2025-08-12'
+GROUP BY
+	ruleid
+ORDER BY 
+	hitcount DESC
+
+
+┌──ruleid─┬─hitcount─┬─────────lasteventat─┐
+│ 1049173 │      359 │ 2025-08-12 08:00:00 │
+└─────────┴──────────┴─────────────────────┘
+
+
+AGGREGATE QUERY:
+
+SELECT
+	ruleIdCoalesce AS ruleId,
+    countMerge(requestCount) AS hitcount,
+    max(tsHour) AS lasteventat
+FROM swa_agg_table_1_dist
+WHERE
+	mspOrganizationId = 0
+	AND ruleIdCoalesce in ('1049173', '43')
+	AND tsHour >= toDateTime('2025-08-12 07:00:00')
+    AND tsHour <= toDateTime('2025-08-12 08:00:00')
+    AND eventDate = '2025-08-12'
+GROUP BY
+	ruleId
+ORDER BY
+	hitcount DESC
+
+
+┌──ruleId─┬─hitcount─┬─────────lasteventat─┐
+│ 1049173 │      359 │ 2025-08-12 08:00:00 │
+└─────────┴──────────┴─────────────────────┘
+
+
+
+
