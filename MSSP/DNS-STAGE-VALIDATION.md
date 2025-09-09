@@ -208,7 +208,7 @@ Response for top incident categories API were huge, hence it is capture in below
 
 ---
 
-### Screenshots of multiple test for 7days
+### Test for 7days
 
 <img width="1338" height="932" alt="Screenshot 2025-09-09 at 6 18 29 PM" src="https://github.com/user-attachments/assets/6a8c37cd-b895-4edd-b051-2fabfff6847a" />
 <img width="1338" height="853" alt="Screenshot 2025-09-09 at 6 12 47 PM" src="https://github.com/user-attachments/assets/4307ea10-3a85-4d9f-9f7d-66eb0ced81da" />
@@ -220,3 +220,55 @@ Response for top incident categories API were huge, hence it is capture in below
 - [top-incident-categories-7d-day-agg.txt](https://github.com/user-attachments/files/22234650/top-incident-categories-7d-day-agg.txt)
 - [top-incident-categories-7d-hour-agg.txt](https://github.com/user-attachments/files/22234652/top-incident-categories-7d-hour-agg.txt)
 - [top-incident-categories-7d-hour-act.txt](https://github.com/user-attachments/files/22234651/top-incident-categories-7d-hour-act.txt)
+
+I found that the shared org has very limited amount of data preent in them hen I have ran the test for Org 0 as well to showcase the performance
+
+``` 
+MSP Org  | Query Name                       | Actual Time   | Agg. Time 
+-------------------------------------------------------------------------
+0        | Top Orgs for Categories......... | 63.098676   s | 66.447045 s
+0        | Top Incident Categories (Hourly) | 32.094867   s | 6.805529  s
+0        | Top Incident Categories (Daily). | 52.181173   s | 7.028487  s
+0        | Top Policy Hitcounts............ | 6.791471    s | 3.916105  s
+0        | Top User Blocks................. | 45.678870   s | 59.131933 s
+8116145  | Top Orgs for Categories......... | 0.462557    s | 1.982688  s
+8116145  | Top Incident Categories (Hourly) | 0.257771    s | 0.284718  s
+8116145  | Top Incident Categories (Daily). | 0.259104    s | 0.340418  s
+8116145  | Top Policy Hitcounts............ | 0.196869    s | 0.145920  s
+8116145  | Top User Blocks................. | 0.229350    s | 0.234277  s
+7097480  | Top Orgs for Categories......... | 0.141093    s | 0.133332  s
+7097480  | Top Incident Categories (Hourly) | 0.124099    s | 0.134777  s
+7097480  | Top Incident Categories (Daily). | 0.136234    s | 0.152360  s
+7097480  | Top Policy Hitcounts............ | 0.127378    s | 0.112103  s
+7097480  | Top User Blocks................. | 0.176916    s | 0.175501  s
+5401137  | Top Orgs for Categories......... | 0.119129    s | 0.131421  s
+5401137  | Top Incident Categories (Hourly) | 0.135156    s | 0.143080  s
+5401137  | Top Incident Categories (Daily). | 0.128417    s | 0.127474  s
+5401137  | Top Policy Hitcounts............ | 0.124363    s | 0.111620  s
+5401137  | Top User Blocks................. | 0.125064    s | 0.126859  s
+2467118  | Top Orgs for Categories......... | 0.273291    s | 0.257968  s
+2467118  | Top Incident Categories (Hourly) | 0.278120    s | 0.242996  s
+2467118  | Top Incident Categories (Daily). | 0.220157    s | 0.228284  s
+2467118  | Top Policy Hitcounts............ | 0.125449    s | 0.163165  s
+2467118  | Top User Blocks................. | 0.290395    s | 0.969985  s
+2505472  | Top Orgs for Categories......... | 0.166294    s | 0.187119  s
+2505472  | Top Incident Categories (Hourly) | 0.144970    s | 0.154230  s
+2505472  | Top Incident Categories (Daily). | 0.157897    s | 0.156590  s
+2505472  | Top Policy Hitcounts............ | 0.122612    s | 0.126782  s
+2505472  | Top User Blocks................. | 0.157736    s | 0.142715  s
+2533528  | Top Orgs for Categories......... | 0.217303    s | 0.239511  s
+2533528  | Top Incident Categories (Hourly) | 0.216720    s | 0.196786  s
+2533528  | Top Incident Categories (Daily). | 0.172735    s | 0.185092  s
+2533528  | Top Policy Hitcounts............ | 0.139310    s | 0.125563  s
+2533528  | Top User Blocks................. | 0.161502    s | 0.152968  s
+2197293  | Top Orgs for Categories......... | 0.196613    s | 0.285245  s
+2197293  | Top Incident Categories (Hourly) | 0.320144    s | 0.333554  s
+2197293  | Top Incident Categories (Daily). | 0.322115    s | 0.314473  s
+2197293  | Top Policy Hitcounts............ | 0.187568    s | 0.112093  s
+2197293  | Top User Blocks................. | 0.126101    s | 0.113034  s
+2639420  | Top Orgs for Categories......... | 0.134437    s | 0.139296  s
+2639420  | Top Incident Categories (Hourly) | 0.186828    s | 0.168381  s
+2639420  | Top Incident Categories (Daily). | 0.131773    s | 0.142795  s
+2639420  | Top Policy Hitcounts............ | 0.114476    s | 0.118774  s
+2639420  | Top User Blocks................. | 0.149495    s | 0.159954  s
+```
