@@ -195,6 +195,7 @@ LIMIT 10
 ---
 
 ### Screenshots of multiple test for 24hr
+
 <img width="1338" height="831" alt="Screenshot 2025-09-09 at 5 28 22 PM" src="https://github.com/user-attachments/assets/82a71421-4854-4912-9743-3b8325488f5d" />
 <img width="1338" height="831" alt="Screenshot 2025-09-09 at 5 26 48 PM" src="https://github.com/user-attachments/assets/69ee2649-0b20-48d6-80c7-8e39875e7a50" />
 <img width="1338" height="690" alt="Screenshot 2025-09-09 at 3 26 14 PM" src="https://github.com/user-attachments/assets/dbacfe8c-45e4-4a78-a1cc-bab57fdb5a67" />
@@ -205,4 +206,17 @@ Response for top incident categories API were huge, hence it is capture in below
 - [top-incident-categories-hour-agg.txt](https://github.com/user-attachments/files/22233961/top-incident-categories-hour-agg.txt) 
 - [top-incident-categories-hour-act.txt](https://github.com/user-attachments/files/22233960/top-incident-categories-hour-act.txt)
 
+---
 
+### Screenshots of multiple test for 7days
+
+<img width="1338" height="932" alt="Screenshot 2025-09-09 at 6 18 29 PM" src="https://github.com/user-attachments/assets/6a8c37cd-b895-4edd-b051-2fabfff6847a" />
+<img width="1338" height="853" alt="Screenshot 2025-09-09 at 6 12 47 PM" src="https://github.com/user-attachments/assets/4307ea10-3a85-4d9f-9f7d-66eb0ced81da" />
+<img width="1338" height="809" alt="Screenshot 2025-09-09 at 6 09 34 PM" src="https://github.com/user-attachments/assets/aded34d9-b8ae-4e19-9dc8-74f8d57d1ff0" />
+<img width="1338" height="683" alt="Screenshot 2025-09-09 at 6 06 48 PM" src="https://github.com/user-attachments/assets/5fda8c9b-1715-4132-82a5-a09f8de90d10" />
+
+Response for top incident categories API were huge, hence it is capture in below files 
+- [top-incident-categories-7d-day-act.txt](https://github.com/user-attachments/files/22234649/top-incident-categories-7d-day-act.txt)
+- [top-incident-categories-7d-day-agg.txt](https://github.com/user-attachments/files/22234650/top-incident-categories-7d-day-agg.txt)
+- [top-incident-categories-7d-hour-agg.txt](https://github.com/user-attachments/files/22234652/top-incident-categories-7d-hour-agg.txt)
+- [top-incident-categories-7d-hour-act.txt](https://github.com/user-attachments/files/22234651/top-incident-categories-7d-hour-act.txt)
