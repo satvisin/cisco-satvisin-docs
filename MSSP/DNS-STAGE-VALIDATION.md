@@ -6,7 +6,7 @@ For all the queries used for MSSP Overview APIs we are using `dns_agg_table_1_di
 
 ---
 
-### Queries for 24hr
+## Queries
 
 Actual Queries:
 ``` sql
