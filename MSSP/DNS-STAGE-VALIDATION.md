@@ -197,8 +197,6 @@ LIMIT 10
 ### Screenshots of multiple test for 24hr
 <img width="1338" height="831" alt="Screenshot 2025-09-09 at 5 28 22 PM" src="https://github.com/user-attachments/assets/82a71421-4854-4912-9743-3b8325488f5d" />
 <img width="1338" height="831" alt="Screenshot 2025-09-09 at 5 26 48 PM" src="https://github.com/user-attachments/assets/69ee2649-0b20-48d6-80c7-8e39875e7a50" />
-<img width="1338" height="831" alt="Screenshot 2025-09-09 at 3 48 56 PM" src="https://github.com/user-attachments/assets/3d69f1e9-f1b7-463c-bf70-2491dd89c67d" />
-<img width="1338" height="831" alt="Screenshot 2025-09-09 at 3 46 57 PM" src="https://github.com/user-attachments/assets/8f20a3d1-5d47-4f68-bb46-cc8dc5397efa" />
 <img width="1338" height="690" alt="Screenshot 2025-09-09 at 3 26 14 PM" src="https://github.com/user-attachments/assets/dbacfe8c-45e4-4a78-a1cc-bab57fdb5a67" />
 
 Response for top incident categories API were huge, hence it is capture in below files 
