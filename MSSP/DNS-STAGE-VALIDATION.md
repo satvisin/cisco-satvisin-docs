@@ -282,3 +282,15 @@ MSP Org  | Query Name   | Actual Time  | Agg. Time
 2639420  | Top User Blocks................. | 0.151698    s | 0.125871  s
 ```
 
+![Xnip2025-09-11_17-46-04](https://github.com/user-attachments/assets/60886ded-ad79-4f2b-ba8c-31fd39930f26)
+
+I found it shocking that the aggregate table is taking more time than the actual table for MSP ORG ID: 0, so to confirm this behaviour I ran the top three queries again one by one to see the difference 
+<img width="1337" height="414" alt="Screenshot 2025-09-10 at 2 09 17 AM" src="https://github.com/user-attachments/assets/49272ad4-8770-4d47-9173-c58d82411003" />
+
+- [dns_7d_ac_hourly.txt](https://github.com/user-attachments/files/22279277/dns_7d_ac_hourly.txt)
+- [dns_7d_agg_hourly.txt](https://github.com/user-attachments/files/22279279/dns_7d_agg_hourly.txt)
+- [dns_7d_agg_daily_result.txt](https://github.com/user-attachments/files/22279281/dns_7d_agg_daily_result.txt)
+- [dns_7d_ac_daily_result.txt](https://github.com/user-attachments/files/22279280/dns_7d_ac_daily_result.txt)
+
+
+
